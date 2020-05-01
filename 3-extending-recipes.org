@@ -1,0 +1,13 @@
+#+TITLE: Yocto Project Training
+#+SUBTITLE: Part 3 - Extending recipes
+#+AUTHOR: Fabio Berton
+#+EMAIL: fabio.berton@ossystems.com.br
+#+STARTUP: indent beamer
+#+LATEX_CLASS: beamer
+#+LATEX_CLASS_OPTIONS: [presentation]
+#+BEAMER_THEME: Madrid
+#+COLUMNS: %45ITEM %10BEAMER_ENV(Env) %10BEAMER_ACT(Act) %4BEAMER_COL(Col)
+#+OPTIONS: H:2 toc:t num:t
+
+* Creating bbappend
+* Applying patches

@@ -1,0 +1,172 @@
+#+TITLE: Yocto Project Training
+#+SUBTITLE: Part 2 - Writing recipes
+#+AUTHOR: Fabio Berton
+#+EMAIL: fabio.berton@ossystems.com.br
+#+STARTUP: indent beamer
+#+LATEX_CLASS: beamer
+#+LATEX_CLASS_OPTIONS: [presentation]
+#+BEAMER_THEME: Madrid
+#+COLUMNS: %45ITEM %10BEAMER_ENV(Env) %10BEAMER_ACT(Act) %4BEAMER_COL(Col)
+#+OPTIONS: H:2 toc:t num:t
+
+* Recipe example: Shell
+** Recipe: Shell script example:
+#+BEGIN_SRC sh
+  DESCRIPTION = "Shell script example"
+  LICENSE = "MIT"
+  LIC_FILES_CHKSUM = "file://${COMMON_LICENSE_DIR}/MIT;md5=0835ade698e0bcf8506ecda2f7b4f302"
+
+  SRC_URI = "file://${BPN}"
+
+  S = "${WORKDIR}"
+
+  do_install() {
+      install -Dm 0755 ${PN} ${D}${bindir}/${PN}
+  }
+#+END_SRC
+
+** Directories installation variables: [[http://www.embeddedlinux.org.cn/OEManual/directories_installation.html][Reference]]
+#+ATTR_LATEX: :width 0.50\textwidth
+[[./images/install_dirs.png]]
+
+** What do I need to know?
+- Where is the ~sh~ file?
+- Where are the ~S~ and ~WORKDIR~?
+- Why there is only ~do_install~ task?
+- Look at build history!!!
+- Inspect all variables with ~ye~
+- Run /QEMU/
+
+* Recipe example: C - [[https://github.com/fbertux/example-c][Source Code]]
+** Recipe: C example
+#+BEGIN_SRC sh
+  DESCRIPTION = "Simple C code example"
+  LICENSE = "MIT"
+  LIC_FILES_CHKSUM = "file://COPYING;md5=838c366f69b72c5df05c96dff79b35f2"
+
+  SRCREV = "e53d5cd4498c76ca8c58e18d0d14891d20f67eab"
+  SRC_URI = "git://github.com/fbertux/${BPN}.git;protocol=https"
+
+  S = "${WORKDIR}/git"
+
+  do_compile() {
+      ${CC} ${PN}.c -o ${PN}
+  }
+
+  do_install() {
+      install -Dm 0755 ${PN} ${D}${bindir}/${PN}
+  }
+#+END_SRC
+
+** What do I need to know?
+- Where is the source code?
+- Where are the ~S~ and ~WORKDIR~?
+- How to compile and install /C/ code
+- Look at build history!!!
+- Inspect all variables with ~ye~
+- Run /QEMU/
+
+** There's more:
+- Others variables needed to build a /C/ code:
+#+BEGIN_SRC sh
+  ${CFLAGS}
+  ${LDFLAGS}
+#+END_SRC
+
+* Recipe example: Makefile
+** Recipe: Makefile example
+#+BEGIN_SRC sh
+DESCRIPTION = "Makefile example"
+LICENSE = "MIT"
+LIC_FILES_CHKSUM = "file://COPYING;md5=838c366f69b72c5df05c96dff79b35f2"
+
+SRCREV = "2c0f9eacec6c886991563f092519a55e1c74dc92"
+SRC_URI = "git://github.com/fbertux/${BPN}.git;protocol=https"
+
+S = "${WORKDIR}/git"
+
+do_configure[noexec] = "1"
+
+do_compile() {
+    oe_runmake
+}
+
+do_install() {
+    oe_runmake DESTDIR=${D} install
+}
+#+END_SRC
+
+** What do I need to know?
+- How to compile and install Makefile based projects
+- What is ~oe_runmake~?
+- Look at build history!!!
+- Inspect all variables with ~ye~
+- Run /QEMU/
+
+* Recipe example: Autotools
+** Recipe: Autotools example
+#+BEGIN_SRC sh
+  DESCRIPTION = "Autotools example"
+  LICENSE = "MIT"
+  LIC_FILES_CHKSUM = "file://COPYING;md5=838c366f69b72c5df05c96dff79b35f2"
+
+  SRCREV = "1ee6714b88df91dd44c9aae6d9264a7e7325ce3e"
+  SRC_URI = "git://github.com/fbertux/${BPN}.git;protocol=https"
+
+  S = "${WORKDIR}/git"
+
+  inherit autotools
+#+END_SRC
+
+** What do I need to know?
+- How the task are running?
+- Look at /autotools/ class
+- Look at build history!!!
+- Inspect all variables with ~ye~
+- Run /QEMU/
+
+* Recipe example: SDL
+** How depends works
+- Why does a package need a dependency?
+- Where the build system find the dependencies?
+- Looking at /sysroot/
+
+** Recipe: SDL example
+#+BEGIN_SRC sh :noweb yes
+  DESCRIPTION = "SDL example"
+  LICENSE = "MIT"
+  LIC_FILES_CHKSUM = "file://COPYING;md5=838c366f69b72c5df05c96dff79b35f2"
+
+  DEPENDS = "libsdl2"
+
+  SRCREV = "4610fe3841f99d8c24d9417f585cd2df0544fe72"
+  SRC_URI = "git://github.com/fbertux/${BPN}.git;protocol=https"
+
+  S = "${WORKDIR}/git"
+
+  inherit pkgconfig
+
+  do_compile() {
+      oe_runmake
+  }
+
+  do_install() {
+      install -Dm 0755 ${S}/main ${D}${bindir}/${PN}
+      install -Dm 0644 ${S}/grumpy-cat.bmp ${D}${datadir}/${PN}/grumpy-cat.bmp
+  }
+
+  FILES_${PN} += "${datadir}"
+#+END_SRC
+
+** What do I need to know?
+- Why do I need to use ~DEPENDS~?
+- Where are the includes and /libs/ file?
+- Inspect /recipes-sysroot/
+- Look at build history!!!
+- Inspect all variables with ~ye~
+- Run ~QEMU~
+
+* Recipe example: RDEPENDS
+** Why does a package need a runtime dependency?
+** Where the package find the dependencies?
+** Example: ~curl~ example

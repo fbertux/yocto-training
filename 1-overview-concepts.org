@@ -1,0 +1,312 @@
+#+TITLE: Yocto Project Training
+#+SUBTITLE: Part 1 - Overview and Concepts
+#+AUTHOR: Fabio Berton
+#+EMAIL: fabio.berton@ossystems.com.br
+#+STARTUP: indent beamer
+#+LATEX_CLASS: beamer
+#+LATEX_CLASS_OPTIONS: [presentation]
+#+BEAMER_THEME: Madrid
+#+COLUMNS: %45ITEM %10BEAMER_ENV(Env) %10BEAMER_ACT(Act) %4BEAMER_COL(Col)
+#+OPTIONS: H:2 toc:t num:t
+
+* Basic Terms
+** Official Documentation
+- [[https://www.yoctoproject.org/docs/latest/mega-manual/mega-manual.html#overview-manual-concepts][Yocto Project Concepts]]
+
+** Configuration Files
+Files that hold global definitions of variables, user-defined variables, and
+hardware configuration information.
+
+** Layer
+A collection of related recipes. Layers allow you to consolidate related
+metadata to customize your build.
+
+** Metadata
+A key element of the Yocto Project is the Metadata that is used to construct a
+Linux distribution and is contained in the files that the OpenEmbedded build
+system parses when building an image.
+
+** OpenEmbedded Build System
+The terms "BitBake" and "build system" are sometimes used for the OpenEmbedded
+Build System.
+
+** BitBake
+Is a generic task execution engine that allows shell and Python tasks to be run
+efficiently and in parallel while working within complex inter-task dependency
+constraints
+
+** OpenEmbedded-Core (OE-Core)
+OE-Core is metadata comprised of foundation recipes, classes, and associated
+files that are meant to be common among many different OpenEmbedded-derived
+systems, including the Yocto Project.
+
+** Packages
+In the context of the Yocto Project, this term refers to a recipe's packaged
+output produced by BitBake (i.e. a "baked recipe"). A package is generally the
+compiled binaries produced from the recipe's sources. You "bake" something by
+running it through BitBake.
+
+** Recipe
+The most common form of metadata.
+
+* BitBake
+** Bitbake
+*** A generic task executor
+- [[https://www.yoctoproject.org/docs/latest/bitbake-user-manual/bitbake-user-manual.html][User manual]]
+- Interprets metadata, decides what tasks are required to run, and executes those tasks.
+- Controls how software is built.
+- GNU Make achieves its control through "makefiles", while BitBake uses "recipes".
+- Includes a fetcher library for obtaining source code from various places.
+
+** Bitbake: Usage and syntax
+*** Build a recipe
+#+BEGIN_SRC sh
+  bitbake recipe
+#+END_SRC
+
+*** See help
+#+BEGIN_SRC sh
+  bitbake -h
+#+END_SRC
+
+*** Most used options:
+- ~-c CMD~ Specify the task to execute
+- ~-k~     Continue as much as possible after an error
+- ~-f~     Force the specified targets/task
+
+** Bitbake
+*** See all recipe related tasks
+#+BEGIN_SRC sh
+  bitbake <recipe> -c listtasks
+#+END_SRC
+
+* Recipes - Metadata
+** Recipes are stored in ~.bb~ files
+- Information about the package (author, homepage, license...)
+- Version of the recipe
+- Existing dependencies (both build and runtime dependencies)
+- Where the source code resides and how to fetch it
+- Whether the source code requires any patches, where to find them, and how to apply them
+- How to configure and compile the source code
+- How to assemble the generated artifacts into one or more installable packages
+- Where on the target machine to install the package or packages created
+
+** Recipe append are stored in ~.bbappend~ files
+- Extend or override information in an existing recipe file
+
+** Recipe Style Guide:
+- See the online [[https://www.openembedded.org/wiki/Styleguide][Style Guide]]
+
+** Configuration (.conf) and underlying include (.inc) files - ~conf~ directory
+- Define various configuration variables that govern the project's build process.
+- Machine configuration
+- Distribution configuration
+- Compiler tuning
+- User configuration
+
+** And classes (.bbclass) files - ~classes~ directory
+- Contain information that is useful to share between metadata files
+- A class usually contains definitions for standard basic tasks such as:
+- Fetch, unpack, configure, compile, install, package
+
+** The OpenEmbedded Build System Workflow
+[[./images/build_system_workflow.png]]
+
+* Yocto Explorer (ye)
+** Yocto Explorer (ye)
+*** Documentation
+The online documentation can be found [[https://doc.ossystems.com.br/ye.html][here]]
+
+** Yocto Explorer (ye)
+*** Most used commands
+- See documentation: ~ye d var~
+- View package content: ~ye pv recipe~
+- Expand variable: ~ye x recipe var~
+- Get workdir location: ~ye wd recipe~
+- See logs: ~ye l recipe~
+
+* Overrides
+** Overrides: Important variables
+*** OVERRIDES
+- [[https://www.yoctoproject.org/docs/latest/mega-manual/mega-manual.html#var-OVERRIDES][Documentation]]
+*** FILESOVERRIDES
+- [[https://www.yoctoproject.org/docs/latest/mega-manual/mega-manual.html#var-FILESOVERRIDES][Documentation]]
+*** FILESPATH
+- [[https://www.yoctoproject.org/docs/latest/mega-manual/mega-manual.html#var-FILESPATH][Documentation]]
+
+* Yocto Recipes
+** Recipe Overview: [[https://www.yoctoproject.org/docs/latest/mega-manual/mega-manual.html#new-recipe-overview][Online Image]]
+#+ATTR_LATEX: :width 0.40\textwidth
+[[./images/recipe-workflow.png]]
+** Name convention
+*** All recipe need to follow this pattern
+#+BEGIN_SRC sh
+  <packagename>_<version>.bb
+  ${PN}_${PV}.bb
+#+END_SRC
+
+** How to create a recipe from start?
+*** The basic parts of a recipe
+- Summary and Description
+- Package information - Homepage, sections
+- License - License checksum
+- Package dependency
+- Where to fetch source code
+- Where unpacked recipe source code resides
+- Classes that I need to inherit
+- Tasks
+- Runtime dependencies
+- etc ...
+
+** Simple recipe template
+#+BEGIN_SRC sh
+  DESCRIPTION = ""
+  LICENSE = ""
+  LIC_FILES_CHKSUM = ""
+  DEPENDS = ""
+
+  SRC_URI = ""
+
+  do_configure() {
+      :
+  }
+  do_compile() {
+      :
+  }
+  do_install() {
+      :
+  }
+
+  RDEPENDS_${PN} += ""
+#+END_SRC
+
+** Summary and Description
+***  Information about recipe
+#+BEGIN_SRC sh
+  SUMMARY = "Short summary of package"
+  DESCRIPTION = "A piece of more detailed information about the package"
+#+END_SRC
+
+** License: [[https://www.yoctoproject.org/docs/latest/mega-manual/mega-manual.html#licensing][Documentation]]
+*** Recipe license information
+#+BEGIN_SRC sh
+  LICENSE = "MIT"
+  LIC_FILES_CHKSUM = "file://${COMMON_LICENSE_DIR}/MIT;md5=0835ade698e0bcf8506ecda2f7b4f302"
+#+END_SRC
+
+** Package dependency: [[https://www.yoctoproject.org/docs/latest/mega-manual/mega-manual.html#new-dependencies][Documentation]]
+*** Usage
+Lists a recipe's build-time dependencies
+
+*** Examples:
+#+BEGIN_SRC sh
+  DEPENDS = "foo"
+  DEPENDS = "foo-native bar-native"
+  DEPENDS += "foo bar"
+  DEPENDS_append = "bar"
+#+END_SRC
+
+*** /TIP/
+Use ~ye~ to get final variable value
+
+** Fetching: [[https://www.yoctoproject.org/docs/latest/bitbake-user-manual/bitbake-user-manual.html#bb-fetchers][Documentation]]
+*** Fetchers
+- Local file fetcher
+- HTTP/FTP wget fetcher
+- Git Fetcher
+
+*** Examples:
+#+BEGIN_SRC sh
+  SRC_URI = "file://relativefile.patch"
+  SRC_URI = "http://oe.handhelds.org/not_there.aac"
+  SRC_URI = "git://git.oe.handhelds.org/git/vip.git;protocol=http"
+#+END_SRC
+
+*** /TIP/
+Use ~ye~ to get final variable value
+
+** Unpacking: [[https://www.yoctoproject.org/docs/latest/mega-manual/mega-manual.html#source-fetching-dev-environment][Documentation]]
+*** Examples
+#+BEGIN_SRC sh
+S = "{WORKDIR}/${PN}-${PV}"
+S = "${WORKDIR}/git"
+#+END_SRC
+
+*** /TIP/
+Use ~ye~ to get final variable value
+
+** Unpacking (cont.):
+#+ATTR_LATEX: :width 0.80\textwidth
+[[./images/fetching.png]]
+
+** Patching: [[https://www.yoctoproject.org/docs/latest/mega-manual/mega-manual.html#new-recipe-patching-code][Documentation]]
+*** Examples:
+#+BEGIN_SRC sh
+  SRC_URI += "file://foo.patch"
+  SRC_URI_append = " file://foo.patch"
+#+END_SRC
+
+** Patching (cont.):
+#+ATTR_LATEX: :width 0.75\textwidth
+[[./images/patching.png]]
+
+** Classes
+*** bbclass files
+- Why do I need to inherit classes?
+- How do I know what classes I need?
+
+** Configure, compile, and install
+*** Documentation
+- [[https://www.yoctoproject.org/docs/latest/mega-manual/mega-manual.html#new-recipe-configuring-the-recipe][configure documentation]]
+- [[https://www.yoctoproject.org/docs/latest/mega-manual/mega-manual.html#new-recipe-compilation][compile documentation]]
+- [[https://www.yoctoproject.org/docs/latest/mega-manual/mega-manual.html#new-recipe-installing][install documentation]]
+
+** Workflow: Configure, compile, and install...
+#+ATTR_LATEX: :width 0.80\textwidth
+[[./images/configuration-compile-autoreconf.png]]
+
+** Runtime dependencies
+*** RDEPENDS
+- Lists runtime dependencies of a package
+- These dependencies are other packages that must be installed in order for the package to function correctly
+*** /TIP:/
+Use ~ye~ to get final variable value
+
+** Glossary
+*** Documetation
+ [[https://www.yoctoproject.org/docs/latest/mega-manual/mega-manual.html#ref-variables-glos][Online Glossary]]
+*** Using ye
+#+BEGIN_SRC sh
+  ye d variable
+#+END_SRC
+
+* Build history
+** Build history
+*** Maintaining Build Output Quality
+- [[https://www.yoctoproject.org/docs/latest/mega-manual/mega-manual.html#maintaining-build-output-quality][Documentation]]
+- Is a class that exists to help you maintain the quality of your build output
+- It records information about the contents of each package and image
+- Highlight unexpected and possibly unwanted changes in the build output
+
+*** Enabling and Build History
+#+BEGIN_SRC sh
+  INHERIT += "buildhistory"
+  BUILDHISTORY_COMMIT = "1"
+#+END_SRC
+
+** Build History (cont.)
+*** Image Information
+- image-files: A directory containing selected files from the root filesystem
+- files-in-image.txt: A list of files in the image
+- installed-package-names.txt: A list of installed packages by name only
+- installed-package-sizes.txt: A list of installed packages ordered by size
+- installed-packages.txt: A list of installed packages with full package filenames
+
+** Understanding What the Build History Contain
+#+ATTR_LATEX: :width 0.40\textwidth
+[[./images/buildhistory.png]]
+
+* References
+** References
+*** All this presentation was based on
+- [[https://www.yoctoproject.org/docs/latest/mega-manual/mega-manual.html][Yocto Project Mega Manual]]

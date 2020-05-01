@@ -1,0 +1,8 @@
+#+TITLE: Yocto Training
+#+AUTHOR: Fabio Berton
+#+EMAIL: fabio.berton@ossystems.com.br
+#+STARTUP: indent
+
+* Part 1: Overview and Concepts
+* Part 2: Writing recipes
+* Part 3: Extending recipes
